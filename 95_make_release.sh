@@ -56,6 +56,7 @@ echo "ui_print(\"Ported from: ${portId}\");" >> ./tmp/header
 echo "ui_print(\"MIUI flavor: ${verHost}\");" >> ./tmp/header
 echo "ui_print(\"MIUI version: ${verIncremental}\");" >> ./tmp/header
 echo "ui_print(\"Kitchen build: ${buildTimestamp}\");" >> ./tmp/header
+echo "ui_print(\"Build flavor: ${buildType}\");" >> ./tmp/header
 echo "ui_print(\" \");" >> ./tmp/header
 cat ./tmp/header ./base_device/META-INF/com/google/android/updater-script > ./target/release/META-INF/com/google/android/updater-script
 
