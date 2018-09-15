@@ -7,7 +7,7 @@ ro.modversion=xiaomi.eu_miuios.cz_miuipolska.pl_cosmicdan.com
 ro.xiaomi.developerid=ingbrzy_acid_and_cosmicdan
 ro.build.host=xiaomi.eu_and_cosmicdan
 
-# Notify for ADB (user needs to know that their device is potentially insecure)
+# Notify for ADB (user should know that their device is potentially insecure)
 persist.adb.notify=1
 
 # Performance! Let the ART VM really stretch it's legs on our beefy hardware (significantly improves boot time)
@@ -18,9 +18,6 @@ dalvik.vm.jitinitialsize=1m
 dalvik.vm.jitthreshold=8000
 # Increase boot image max heap size to improve initial bringup time of deodex'd ROM's
 dalvik.vm.image-dex2oat-Xmx=512m
-# Increase dex2oat thread count for boot time and boot image optimizing process (improve boot time)
-dalvik.vm.image-dex2oat-threads=6
-dalvik.vm.boot-dex2oat-threads=6
-# Do a more thorough optimization on boot
-pm.dexopt.boot=speed-profile
-pm.dexopt.first-boot=speed-profile
+# Do a more-thorough optimization on boot
+pm.dexopt.boot=speed
+pm.dexopt.first-boot=speed

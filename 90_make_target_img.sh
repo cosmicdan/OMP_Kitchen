@@ -36,7 +36,7 @@ cd ./bin/aik
 ln -s ../../target/boot/ramdisk ./ramdisk
 ln -s ../../target/boot/split_img ./split_img
 ln -s ../../target/boot/ramdisk-new.cpio.gz ./ramdisk-new.cpio.gz
-./repackimg.sh
+./repackimg.sh > ../../target/boot/repack.log 2>&1
 # cleanup
 rm -f ./ramdisk ./split_img ./ramdisk-new.cpio.gz ./unsigned-new.img
 mv ./image-new.img ../../target/boot.img

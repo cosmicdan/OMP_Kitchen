@@ -93,18 +93,6 @@ fi
 
 
 ###############
-### Verify arguments
-###############
-
-if [ "${DEBUG}" == "FALSE" ]; then
-	echo "[!] User build requested but currently unsupported."
-	echo ""
-	exit -1
-fi
-
-
-
-###############
 ### Build environment checks
 ###############
 
@@ -158,8 +146,26 @@ sed '/^[ \t]*$/d' "./config.deviceid.cfg" | while read -r LINE; do
 done
 
 checkError
+
+# YYMMDD-MinutesSinceMidnight
+setBuildInfo buildTimestamp=`date -u +"%Y%m%d-$(( $(date '+%H * 60 + %M') ))"`
+setBuildInfo verIncremental=`file_getprop ./src_port_system/build.prop ro.build.version.incremental`
+setBuildInfo verHost=`file_getprop ./src_port_system/build.prop ro.build.host`
+if [ "${DEBUG}" == "TRUE" ]; then
+	setBuildInfo buildType=debug
+else
+	setBuildInfo buildType=user
+fi
+
+
 refreshBuildInfo
-echo "    [i] Base device is '${deviceId}', port device is '${portId}'"
+echo "[i] Build info:"
+echo "    Device ID: ${deviceId}"
+echo "    Port ID: ${portId}"
+echo "    Build timestamp: ${buildTimestamp}"
+echo "    Build type: ${buildType}"
+echo "    Port version: ${verIncremental}"
+echo "    Port host: ${verHost}"
 
 checkAndMakeTmp
 
@@ -195,7 +201,6 @@ else
 	addOrReplaceTargetProp ro.debuggable= ro.debuggable=0
 	addOrReplaceTargetProp persist.sys.usb.config= persist.sys.usb.config=mtp
 fi
-
 
 
 ###############

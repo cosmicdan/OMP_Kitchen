@@ -165,6 +165,13 @@ setError() {
 	exit -1
 }
 
+# $1 = file path
+# $2 = key to get (without trailing =)
+file_getprop() {
+	foundProp=`grep "^$2=" "$1" | tail -1`
+	echo "${foundProp#*=}"
+}
+
 checkError() {
 	if [ -f ./tmp/has_errored ]; then
 		exit

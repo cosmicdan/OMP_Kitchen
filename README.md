@@ -15,7 +15,7 @@ E.g:
 
 ## Building
 
-Run `./build.sh` to see options for building ROM's in one swoop, or the other .sh scripts for individual tasks.
+[Instructions TODO]
 
 ### Notes about building ROM's
 
