@@ -126,30 +126,31 @@ for baseSuffix in "port" "device"; do
 	fi
 done
 
-# Unpack device initramfs
+# Unpack device kernel
 for baseSuffix in "device"; do
 	if [ -f "./base_${baseSuffix}/boot.img" ]; then
-		if [ ! -d "./src_${baseSuffix}_initramfs" ]; then
-			echo "[#] Unpacking initramfs from ./base_${baseSuffix}/boot.img [sudo required]..."
-			mkdir "./tmp/bootimg"
-			./bin/unpackbootimg --input "./base_${baseSuffix}/boot.img" --output "./tmp/bootimg/" >/dev/null
-			mkdir "./src_${baseSuffix}_initramfs"
-			cd "./src_${baseSuffix}_initramfs"
-			sudo gzip -dcq "../tmp/bootimg/boot.img-ramdisk.gz" | sudo cpio -i -d --no-absolute-filenames >/dev/null
+		if [ ! -d "./src_${baseSuffix}_boot" ]; then
+			echo "[#] Unpacking kernel from ./base_${baseSuffix}/boot.img ..."
+			mkdir "./src_${baseSuffix}_boot"
+			./bin/aik/unpackimg.sh --nosudo ./base_${baseSuffix}/boot.img > "./src_${baseSuffix}_boot/unpackimg.log" 2>&1
+			cd ./bin/aik
+			mv ./split_img ../../src_${baseSuffix}_boot/split_img
+			mv ./ramdisk ../../src_${baseSuffix}_boot/ramdisk
 			# also backup facl and chmod
 			if [ ! -d "../src_${baseSuffix}_metadata" ]; then
 				mkdir "../src_${baseSuffix}_metadata"
 			fi
-			if [ -f "../src_${baseSuffix}_metadata/initramfs.acl" ]; then
-				rm "../src_${baseSuffix}_metadata/initramfs.acl"
+			if [ -f "../src_${baseSuffix}_metadata/ramdisk.acl" ]; then
+				rm "../src_${baseSuffix}_metadata/ramdisk.acl"
 			fi
-			echo "    [#] Creating ACL list at ./src_${baseSuffix}_metadata/initramfs.acl [sudo getfacl required]..."
-			sudo getfacl -R . > "../src_${baseSuffix}_metadata/initramfs.acl"
-			echo "    [#] Setting mode 777 recursive to ./src_${baseSuffix}_initramfs/ [sudo chmod required]..."
+			echo "    [#] Creating ACL list at ./src_${baseSuffix}_metadata/ramdisk.acl ..."
+			cd ../../src_${baseSuffix}_boot/ramdisk
+			getfacl -R . > "../../src_${baseSuffix}_metadata/ramdisk.acl"
+			echo "    [#] Setting mode 777 recursive to ./src_${baseSuffix}_boot/ramdisk ..."
 			sudo chmod -R 777 .
-			cd ..
+			cd ../..
 		else
-			echo "[i] ./src_${baseSuffix}_initramfs already exists, skipping boot.img ramdisk unpack."
+			echo "[i] ./src_${baseSuffix}_boot already exists, skipping boot.img ramdisk unpack."
 		fi
 	else
 		echo "[!] Warning - ./base_${baseSuffix}/boot.img does not exist (needed for initramfs mods)."

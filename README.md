@@ -26,7 +26,6 @@ Run `./build.sh` to see options for building ROM's in one swoop, or the other .s
 
 ## Credits and Thanks
 
-- https://github.com/wuxianlin/sefcontext_decompile
-  file_contexts.bin decompiler
-- https://github.com/jamflux/make_ext4fs
-  make_ext4fs
+- https://github.com/wuxianlin/sefcontext_decompile - file_contexts.bin decompiler
+- https://github.com/jamflux/make_ext4fs - Oreo-compatible make_ext4fs (gets fs_config from /etc binaries automatically)
+- https://github.com/osm0sis/Android-Image-Kitchen/tree/AIK-Linux - Source for unpacking/repacking boot.img
