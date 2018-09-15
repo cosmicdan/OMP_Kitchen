@@ -1,0 +1,66 @@
+# Prop keynames that will be found in the device system and added/replaced into the MIUI build
+# If a prop listed here isn't found in the device system, the build will fail.
+#
+# Note that keys like ro.build.flavor, ro.product.name and etc. don't NEED to be specified here
+# as the kitchen will mass-replace the device name in all keys
+#
+
+# User-facing device name
+ro.product.model
+
+# Device characteristics e.g. nosdcard
+ro.build.characteristics
+
+# Does not exist in MIUI (must be hard-coded) but it doesn't hurt to add it
+ro.miui.notch
+
+# LCD density
+ro.sf.lcd_density
+
+# Disable backlight notify to displayfeature
+ro.xiaomi.bl.notify
+
+#support E-label property
+ro.product.cert
+
+#support night mode 2.0
+ro.eyecare.brightness.threshold
+ro.eyecare.brightness.level
+ro.hist.brightness.threshold
+
+# White Point Calibration
+ro.whitepoint_calibration_enable
+
+# system property for bt split 44.1k sample rate
+persist.vendor.bt.splita2dp.44_1_war
+
+#allow update modem profile to satify single ip-type pdp request
+persist.data.profile_update
+
+# ?
+persist.vendor.camera.perfcapture
+
+#ir led brightness
+camera.irled.brightness
+
+# ? xiaomi.eu has this disabled (set to 0) as an extra prop, despite Mi 8 default appearing to be enabled (1). Poco is also enabled (1), so we'll try the original for now
+sdm.debug.disable_dest_scalar
+
+# Change from China to Global
+ro.rom.zone
+
+# Browser stuff?
+ro.channelid.ucbrowserintl
+
+# Targetted advertising settings?
+ro.trackingId.com.lzd.appid
+
+# Poco branding?
+ro.miui.customized_clientid
+
+# Poco has "mam" excluded
+ro.product.mod_device
+
+# idk
+ro.booking.channel.path
+

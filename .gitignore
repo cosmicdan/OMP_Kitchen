@@ -1,0 +1,17 @@
+# Exclude everything by default
+/*
+/*/
+
+# Include .txt files inside base_* folders (placeholders)
+!/base_*/
+/base_*/*
+!/base_*/*.txt
+
+# Include the actual kitchen files
+!/bin/
+!/patches/
+!/.gitignore
+!/*.sh
+!/*.cfg
+!/**/*.md
+
