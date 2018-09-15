@@ -123,69 +123,11 @@ if [ "${QUICK}" == "TRUE" ]; then
 	echo "[i] Quick mode enabled. Will only copy the bulk of files if target does not exist."
 fi
 
-checkAndMakeTmp
+mkdir ./target
 
-###############
-### Copy files
-###############
-
-if [ "${QUICK}" == "FALSE" -o ! -d "./target/system" ]; then
-	echo "[#] Copying port system..."
-	mkdir -p "./target/system"
-	rsync -a "src_port_system/" "target/system/"
-	echo "[#] Copying device vendor..."
-	mkdir -p "./target/vendor"
-	rsync -a "src_device_vendor/" "target/vendor/"
-fi
-
-# Debug = god-mode ADBD
-if [ "${DEBUG}" == "TRUE" ]; then
-	echo "[#] Making insecure ADB on boot changes..."
-	addOrReplaceTargetProp ro.adb.secure= ro.adb.secure=0
-	addOrReplaceTargetProp ro.debuggable= ro.debuggable=1
-	addOrReplaceTargetProp persist.sys.usb.config= persist.sys.usb.config=mtp,adb
-	# 'God-mode' adbd (allows root daemon on user-builds)
-	# Disabled for now (refuses to work on user builds?)
-	#cp -af "./patches/adbd_godmode" "./target/system/bin/adbd"
-else
-	echo "[i] Making secure/user-mode changes..."
-	addOrReplaceTargetProp ro.adb.secure= ro.adb.secure=1
-	addOrReplaceTargetProp ro.debuggable= ro.debuggable=0
-	addOrReplaceTargetProp persist.sys.usb.config= persist.sys.usb.config=mtp
-fi
-
-
-
-###############
-### Vendor
-###############
-
-echo "[#] Vendor changes..."
-echo "    [#] Changing to file-based encryption on Userdata (compatible TWRP required)..."
-verifyFilesExist ./target/vendor/etc/fstab.qcom
-sed -i -e '/userdata/ s/forceencrypt=footer/fileencryption=ice/' ./target/vendor/etc/fstab.qcom
-sed -i -e '/userdata/ s/encryptable=footer/fileencryption=ice/' ./target/vendor/etc/fstab.qcom
-
-
-
-
-###############
-### SELinux
-###############
-
-# Nothing to do
-
-
-
-
-###############
-### Props
-###############
-
-echo "[#] Adding/updating props ..."
 {
 IFS=
-echo "    [#] Checking device identity..."
+echo "[#] Verifying config and sources..."
 # sed is used here to skip over blank lines (kind of)
 sed '/^[ \t]*$/d' "./config.deviceid.cfg" | while read -r LINE; do
 	if [[ "${LINE}" == "#"* ]]; then
@@ -203,27 +145,74 @@ sed '/^[ \t]*$/d' "./config.deviceid.cfg" | while read -r LINE; do
 			setError
 		fi
 		portId="${propPortSearch#*=}"
-		echo "        [i] Base device is '${deviceId}', port device is '${portId}'"
-		echo "    [#] Updating all props with new device name..."
-		for propFile in "${prop_locations[@]}"; do
-			sed -i "s|${portId}|${deviceId}|g" "./target/system/${propFile}"
-		done
+		setBuildInfo deviceId=${deviceId}
+		setBuildInfo portId=${portId}
 	else
 		# Error-out if the prop key wasn't found in the device source
 		echo "[!] Error - config.deviceid.cfg is incorrect (could not find ${LINE} in device source ${prop_locations[0]})."
 		echo "    Aborted."
 		setError
 	fi
-	
-	# also rename some media stuff while we can
-	mv ./target/system/media/wallpaper/${portId}_wallpaper.jpg ./target/system/media/wallpaper/${deviceId}_wallpaper.jpg 
-	mv ./target/system/media/lockscreen/${portId}_lockscreen.jpg ./target/system/media/lockscreen/${deviceId}_lockscreen.jpg 
-	
 	# always break - config.deviceid.cfg can only have one key=value entry
 	break;
 done
 
 checkError
+refreshBuildInfo
+echo "    [i] Base device is '${deviceId}', port device is '${portId}'"
+
+checkAndMakeTmp
+
+
+###############
+### Copy files
+###############
+
+if [ "${QUICK}" == "FALSE" -o ! -d "./target/system" ]; then
+	echo "[#] Copying port system..."
+	mkdir -p "./target/system"
+	rsync -a "src_port_system/" "target/system/"
+	echo "[#] Copying device vendor..."
+	mkdir -p "./target/vendor"
+	rsync -a "src_device_vendor/" "target/vendor/"
+	echo "[#] Copying device boot..."
+	mkdir -p "./target/boot/ramdisk"
+	rsync -a "src_device_boot/" "target/boot/"
+fi
+
+# Debug = god-mode ADBD
+if [ "${DEBUG}" == "TRUE" ]; then
+	echo "[#] Making insecure ADB on boot changes..."
+	addOrReplaceTargetProp ro.adb.secure= ro.adb.secure=0
+	addOrReplaceTargetProp ro.debuggable= ro.debuggable=1
+	addOrReplaceTargetProp persist.sys.usb.config= persist.sys.usb.config=mtp,adb
+	# 'God-mode' adbd (allows root daemon on user-builds)
+	cp -af "./patches/adbd_godmode" "./target/system/bin/adbd"
+	sed -i -e 's/u:r:adbd:s0/u:r:su:s0/' "./target/boot/ramdisk/init.usb.rc"
+else
+	echo "[i] Making secure/user-mode changes..."
+	addOrReplaceTargetProp ro.adb.secure= ro.adb.secure=1
+	addOrReplaceTargetProp ro.debuggable= ro.debuggable=0
+	addOrReplaceTargetProp persist.sys.usb.config= persist.sys.usb.config=mtp
+fi
+
+
+
+###############
+### Mods/Patches
+###############
+
+echo "[#] Patches and mods ..."
+echo "    [#] Enabling file-based encryption for Userdata (compatible TWRP required)..."
+verifyFilesExist ./target/vendor/etc/fstab.qcom
+sed -i -e '/userdata/ s/forceencrypt=footer/fileencryption=ice/' "./target/vendor/etc/fstab.qcom"
+sed -i -e '/userdata/ s/encryptable=footer/fileencryption=ice/' "./target/vendor/etc/fstab.qcom"
+
+
+
+###############
+### Props
+###############
 
 echo "" >> "./target/system/${prop_locations[0]}"
 echo "######" >> "./target/system/${prop_locations[0]}"
@@ -300,17 +289,24 @@ fi
 
 echo "[#] Device conversion tasks..."
 # Device feature definitions
-# TODO: tweak this XML; might be able to unlock some hidden features
+# TODO: Have a closer look at this XML; might be able to unlock some hidden or experimental features
+echo "    [i] Copy device features..."
 addToTargetFromDevice "system/etc/device_features/"
-# For FM radio
+echo "    [i] Copy services, frameworks and permissions [TODO: deodex so this actually matters; GitHub issue #1]..."
 addToTargetFromDevice "system/etc/init/"
-# For location service
-# TODO: Source device jar is odex'd
 addToTargetFromDevice "system/etc/permissions/"
-# Missing audio (ringtones)
+echo "    [i] Copy extra media files from device..."
 addToTargetFromDevice "system/media/audio/"
-# Missing lockscreens
 addToTargetFromDevice "system/media/lockscreen/"
+# Replace all prop occurances of portId with deviceId
+echo "    [i] Mass-rebrand from '${portId}' to '${deviceId}'..."
+for propFile in "${prop_locations[@]}"; do
+	sed -i "s|${portId}|${deviceId}|g" "./target/system/${propFile}"
+done
+# Rename some MIUI theme stuff
+# TODO: Change to a global find-and-rename
+mv ./target/system/media/wallpaper/${portId}_wallpaper.jpg ./target/system/media/wallpaper/${deviceId}_wallpaper.jpg 
+mv ./target/system/media/lockscreen/${portId}_lockscreen.jpg ./target/system/media/lockscreen/${deviceId}_lockscreen.jpg 
 
 
 

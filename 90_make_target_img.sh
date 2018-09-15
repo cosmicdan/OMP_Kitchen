@@ -28,7 +28,21 @@ cat \
 
 echo "[#] Building target/system.img ..."
 ./bin/make_ext4fs -l `getConfig system_size` -L system -a system -S "./tmp/file_contexts_all" -T 1 -s "./target/system.img" "./target/system"
+echo "[#] Building target/vendor.img ..."
 ./bin/make_ext4fs -l `getConfig vendor_size` -L system -a system -S "./tmp/file_contexts_all" -T 1 -s "./target/vendor.img" "./target/vendor"
+echo "[#] Building target/boot.img ..."
+cd ./bin/aik
+# create symlinks instead of moving/copying
+ln -s ../../target/boot/ramdisk ./ramdisk
+ln -s ../../target/boot/split_img ./split_img
+ln -s ../../target/boot/ramdisk-new.cpio.gz ./ramdisk-new.cpio.gz
+./repackimg.sh
+# cleanup
+rm -f ./ramdisk ./split_img ./ramdisk-new.cpio.gz ./unsigned-new.img
+mv ./image-new.img ../../target/boot.img
+cd ../..
+
+
 
 
 

@@ -145,6 +145,21 @@ getConfig() {
 	echo "${configLine#*=}"
 }
 
+refreshBuildInfo() {
+	#buildKey="$1"
+	#buildKeyLine=`grep ${configKey} "./target/build.cfg" | tail -1`
+	#echo "${buildKeyLine#*=}"
+	buildInfo=`cat "./target/build.cfg"`
+	for buildInfoLine in $buildInfo; do
+		eval $buildInfoLine
+	done
+}
+
+setBuildInfo() {
+	# TODO: Replace existing value if found. Necessary?
+	echo "$1" >> "./target/build.cfg"
+}
+
 setError() {
 	touch ./tmp/has_errored
 	exit -1
