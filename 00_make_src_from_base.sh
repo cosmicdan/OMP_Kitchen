@@ -42,6 +42,9 @@ for baseSuffix in "port" "device"; do
 			else
 				echo "    [i] file_contexts already exists, skipping."
 			fi
+		else
+			echo     "    [!] file_contexts.bin missing. This is required."
+			exit -1
 		fi
 	
 		for imageName in "system" "vendor"; do
@@ -137,18 +140,21 @@ for baseSuffix in "device"; do
 			mv ./split_img ../../src_${baseSuffix}_boot/split_img
 			mv ./ramdisk ../../src_${baseSuffix}_boot/ramdisk
 			# also backup facl and chmod
-			if [ ! -d "../src_${baseSuffix}_metadata" ]; then
-				mkdir "../src_${baseSuffix}_metadata"
-			fi
-			if [ -f "../src_${baseSuffix}_metadata/ramdisk.acl" ]; then
-				rm "../src_${baseSuffix}_metadata/ramdisk.acl"
-			fi
-			echo "    [#] Creating ACL list at ./src_${baseSuffix}_metadata/ramdisk.acl ..."
-			cd ../../src_${baseSuffix}_boot/ramdisk
-			getfacl -R . > "../../src_${baseSuffix}_metadata/ramdisk.acl"
-			echo "    [#] Setting mode 777 recursive to ./src_${baseSuffix}_boot/ramdisk ..."
-			sudo chmod -R 777 .
+			#if [ ! -d "../src_${baseSuffix}_metadata" ]; then
+			#	mkdir "../src_${baseSuffix}_metadata"
+			#fi
+			#if [ -f "../src_${baseSuffix}_metadata/ramdisk.acl" ]; then
+			#	rm "../src_${baseSuffix}_metadata/ramdisk.acl"
+			#fi
+			#echo "    [#] Creating ACL list at ./src_${baseSuffix}_metadata/ramdisk.acl ..."
+			#cd ../../src_${baseSuffix}_boot/ramdisk
+			#getfacl -R . > "../../src_${baseSuffix}_metadata/ramdisk.acl"
+			#echo "    [#] Setting mode 777 recursive to ./src_${baseSuffix}_boot/ramdisk ..."
+			#sudo chmod -R 777 .
 			cd ../..
+			# put decompiled file_contexts into ramdisk too
+			cp -a "./base_${baseSuffix}/file_contexts" "./src_${baseSuffix}_boot/ramdisk/"
+			echo "    [i] Added file_contexts to ramdisk root"
 		else
 			echo "[i] ./src_${baseSuffix}_boot already exists, skipping boot.img ramdisk unpack."
 		fi

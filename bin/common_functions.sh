@@ -139,6 +139,18 @@ addLineBefore() {
 	done
 }
 
+# TODO
+# Args:
+# 1) name of the service
+# 2) attribute (e.g. class, group, etc) to add or replace (first token)
+# 3) Quoted-string of the new entry, excluding the attribute name
+updateInitService() {
+	rcFiles=$(find ./target/ -type f -name '*.rc')
+	#for rcFile in rcFiles; do
+	
+	#done
+}
+
 getConfig() {
 	configKey="$1"
 	configLine=`grep ${configKey} "./config.device.cfg" | tail -1`

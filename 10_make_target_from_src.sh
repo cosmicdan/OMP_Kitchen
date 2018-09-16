@@ -98,7 +98,7 @@ fi
 
 echo ""
 echo "------------------------------------------"
-echo "[i] 01_make_target_from_src started."
+echo "[i] make_target_from_src started."
 echo ""
 
 if [ -d "./target" -a "${QUICK}" == "FALSE" ]; then
@@ -182,7 +182,7 @@ if [ "${QUICK}" == "FALSE" -o ! -d "./target/system" ]; then
 	mkdir -p "./target/vendor"
 	rsync -a "src_device_vendor/" "target/vendor/"
 	echo "[#] Copying device boot..."
-	mkdir -p "./target/boot/ramdisk"
+	mkdir -p "./target/boot"
 	rsync -a "src_device_boot/" "target/boot/"
 fi
 
@@ -193,8 +193,10 @@ if [ "${DEBUG}" == "TRUE" ]; then
 	addOrReplaceTargetProp ro.debuggable= ro.debuggable=1
 	addOrReplaceTargetProp persist.sys.usb.config= persist.sys.usb.config=mtp,adb
 	# 'God-mode' adbd (allows root daemon on user-builds)
-	cp -af "./patches/adbd_godmode" "./target/system/bin/adbd"
-	sed -i -e 's/u:r:adbd:s0/u:r:su:s0/' "./target/boot/ramdisk/init.usb.rc"
+	# DISABLED: SEPolicy needs fixing
+	#cp -af "./patches/adbd_godmode" "./target/system/bin/adbd"
+	#sed -i -e 's/u:r:adbd:s0/u:r:su:s0/' "./target/boot/ramdisk/init.usb.rc"
+	#sed -i -e 's/u:object_r:adbd_exec:s0/u:object_r:system_file:s0/' "./target/boot/ramdisk/file_contexts"
 else
 	echo "[i] Making secure/user-mode changes..."
 	addOrReplaceTargetProp ro.adb.secure= ro.adb.secure=1
@@ -332,7 +334,7 @@ mv ./target/system/media/lockscreen/${portId}_lockscreen.jpg ./target/system/med
 ###############
 
 echo ""
-echo "[i] 01_make_target_from_src finished."
+echo "[i] make_target_from_src finished."
 echo "------------------------------------------"
 echo ""
 
