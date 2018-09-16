@@ -16,7 +16,7 @@ buildTimestamp=UNKNOWNTIMESTAMP
 verHost=UNKNOWNHOST
 
 refreshBuildInfo
-zipFileName="miui-${deviceId}_${verIncremental}_${buildTimestamp}_${buildType}_${verHost}_${portId}-port.zip"
+zipFileName="miui-${deviceId}_${buildTimestamp}_${verIncremental}_${buildType}_${verHost}_${portId}-port.zip"
 echo "[#] Starting release ZIP build..."
 echo "    [i] ZIP filename:"
 echo "        ${zipFileName}"
