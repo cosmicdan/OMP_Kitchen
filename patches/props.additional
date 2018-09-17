@@ -10,17 +10,8 @@ ro.build.host=xiaomi.eu_and_cosmicdan
 # Notify for ADB (user should know that their device is potentially insecure)
 persist.adb.notify=1
 
-# Performance! Let the ART VM really stretch it's legs on our beefy hardware (significantly improves boot time)
+# Also profile secondary dex's
 dalvik.vm.dexopt.secondary=true
-# increase JIT code cache size (improves GC lag with initial bringup)
-dalvik.vm.jitinitialsize=1m
-# allow more code to be JIT'd in general (somewhat experimental - if issues occur I should revert this to 10000)
-dalvik.vm.jitthreshold=8000
-# Increase boot image max heap size to improve initial bringup time of deodex'd ROM's
-dalvik.vm.image-dex2oat-Xmx=1024m
-# Increase ideal heap free range
-#dalvik.vm.heapminfree=4m
-#dalvik.vm.heapmaxfree=16m
 # Do a more-thorough optimization on boot
 pm.dexopt.boot=speed-profile
 pm.dexopt.first-boot=speed-profile
