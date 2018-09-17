@@ -188,17 +188,17 @@ fi
 
 # Debug = god-mode ADBD
 if [ "${DEBUG}" == "TRUE" ]; then
-	echo "[#] Making insecure ADB on boot changes..."
-	addOrReplaceTargetProp ro.adb.secure= ro.adb.secure=0
-	addOrReplaceTargetProp ro.debuggable= ro.debuggable=1
+	echo "[#] Debug/insecure mode changes..."
 	addOrReplaceTargetProp persist.sys.usb.config= persist.sys.usb.config=mtp,adb
+	# DISABLED: The rest needs an insecure ADBD, which in turn needs SEPolicy changes
+	#addOrReplaceTargetProp ro.adb.secure= ro.adb.secure=0
+	#addOrReplaceTargetProp ro.debuggable= ro.debuggable=1
 	# 'God-mode' adbd (allows root daemon on user-builds)
-	# DISABLED: SEPolicy needs fixing
 	#cp -af "./patches/adbd_godmode" "./target/system/bin/adbd"
 	#sed -i -e 's/u:r:adbd:s0/u:r:su:s0/' "./target/boot/ramdisk/init.usb.rc"
 	#sed -i -e 's/u:object_r:adbd_exec:s0/u:object_r:system_file:s0/' "./target/boot/ramdisk/file_contexts"
 else
-	echo "[i] Making secure/user-mode changes..."
+	echo "[i] User/secure user-mode changes..."
 	addOrReplaceTargetProp ro.adb.secure= ro.adb.secure=1
 	addOrReplaceTargetProp ro.debuggable= ro.debuggable=0
 	addOrReplaceTargetProp persist.sys.usb.config= persist.sys.usb.config=mtp
