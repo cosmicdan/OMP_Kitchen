@@ -1,19 +1,7 @@
 #!/bin/bash
 
 # Common functions shared by multiple scripts
-
-checkAndMakeTmp() {
-	if [ -d "./tmp" ]; then
-		echo "[!] An old ./tmp/ folder exists. This is usually cleaned up; there may be WIP changes here or an error previously occured."
-		echo "    Aborting for safety reasons. Please delete or move ./tmp/ when you're sure you want to discard it."
-		exit -1
-	fi
-	mkdir ./tmp
-}
-
-cleanupTmp() {
-	rm -rf "./tmp"
-}
+# TODO: Cleanup; some functions here may no longer be used since the rewrite
 
 verifyFilesExist() {
 	for filepath in "$@"; do
@@ -92,19 +80,19 @@ getEscapedVarForSed() {
 # Args:
 # 1) prop keyname with trailing =
 # 2) full replacement prop keyname=value string. If empty, the prop will be commented-out instead
-addOrReplaceTargetProp() {
+addOrReplaceOutProp() {
 	propKey="$1"
 	propKeyValueNew="$2"
 	propReplaced=FALSE
 	for propFile in "${prop_locations[@]}"; do
-		if grep -q ${propKey} "./target/system/${propFile}"; then
+		if grep -q ${propKey} "${miuiOutPath}/system/${propFile}"; then
 			propKeyEscaped=`getEscapedVarForSed "${propKey}"`
 			if [ "${propKeyValueNew}" == "" ]; then
 				# missing second parameter = comment-out instead of replace
-				sed -i "/${propKeyEscaped}/s/^/### Removed by CosmicDan's MIUI kitchen ### /g" "./target/system/${propFile}"
+				sed -i "/${propKeyEscaped}/s/^/### Removed by CosmicDan's MIUI kitchen ### /g" "${miuiOutPath}/system/${propFile}"
 			else
 				replacementEscaped=`getEscapedVarForSed "${propKeyValueNew}"`
-				sed -i "s|${propKeyEscaped}.*|${replacementEscaped}|g" "./target/system/${propFile}"
+				sed -i "s|${propKeyEscaped}.*|${replacementEscaped}|g" "${miuiOutPath}/system/${propFile}"
 			fi
 			propReplaced=TRUE
 			# don't break - we want to find and replace all occurances (in every prop file)
@@ -116,7 +104,7 @@ addOrReplaceTargetProp() {
 			echo "    [!] Property was not found for removal, continuing anyway: ${propKey}"
 		else
 			# prop wasn't found, add it
-			echo "${propKeyValueNew}" >> "./target/system/${prop_locations[0]}"
+			echo "${propKeyValueNew}" >> "${miuiOutPath}/system/${prop_locations[0]}"
 		fi
 	fi
 }
@@ -139,7 +127,7 @@ addLineBefore() {
 	done
 }
 
-# TODO
+# TODO. Currently unused so unfinished.
 # Args:
 # 1) name of the service
 # 2) attribute (e.g. class, group, etc) to add or replace (first token)
@@ -161,20 +149,14 @@ refreshBuildInfo() {
 	#buildKey="$1"
 	#buildKeyLine=`grep ${configKey} "./target/build.cfg" | tail -1`
 	#echo "${buildKeyLine#*=}"
-	buildInfo=`cat "./target/build.cfg"`
+	buildInfo=$(cat "${miuiOutPath}/build.cfg")
 	for buildInfoLine in $buildInfo; do
 		eval $buildInfoLine
 	done
 }
 
 setBuildInfo() {
-	# TODO: Replace existing value if found. Necessary?
-	echo "$1" >> "./target/build.cfg"
-}
-
-setError() {
-	touch ./tmp/has_errored
-	exit -1
+	echo "$1" >> "${miuiOutPath}/build.cfg"
 }
 
 # $1 = file path
@@ -184,8 +166,9 @@ file_getprop() {
 	echo "${foundProp#*=}"
 }
 
-checkError() {
-	if [ -f ./tmp/has_errored ]; then
-		exit
+# Thanks to https://stackoverflow.com/questions/85880/determine-if-a-function-exists-in-bash
+functionExists() {
+	if [ -n "$(type -t $1)" ] && [ "$(type -t $1)" = function ]; then
+		echo true
 	fi
 }

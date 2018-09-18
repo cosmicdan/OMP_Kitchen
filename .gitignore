@@ -8,10 +8,15 @@
 !/base_*/*.txt
 
 # Include the actual kitchen files
-!/bin/
+!/build/
 !/patches/
 !/.gitignore
 !/*.sh
 !/*.cfg
 !/**/*.md
 
+# Include device sh files
+!/devices/
+!/devices/*/
+/devices/*/*
+!/devices/*/*.sh
