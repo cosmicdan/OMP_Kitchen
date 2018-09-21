@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+(
+ORIGIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+java -jar "${ORIGIN_DIR}/baksmali-2.2.5.jar" "$@"
+)

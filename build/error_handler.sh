@@ -10,6 +10,8 @@ clearError() {
 # 66 = Device firmware preparation failure
 # 67 = Attempted build with flavor not set or missing
 # 68 = Device tree is missing essential build script include
+# 69 = Flavor is missing critical files
+# 70 = Generic invalid or unrecognized function argument
 setError() {
 	echo $1 > /tmp/miui_kitchen_last_error
 }

@@ -8,10 +8,30 @@ doDevicePrep() {
 		overwriteOld=true
 	fi
 	
+	# mandatory arguments done so shift
+	shift 1
+	
+	# default OPTIONs
 	deleteOrg=false
-	if [ "$2" == "clean" ]; then
-		deleteOrg=true
-	fi
+	doDeopt=true
+	
+	# get OPTION args
+	while [[ $# -gt 0 ]]; do
+		option="$1"
+
+		case $option in
+			cleanup)
+			deleteOrg=true
+			shift;;
+			skip-deopt)
+			doDeopt=false
+			shift;;
+			*)    # unknown option, bail-out
+			echo "[!] Unrecognized option: '${option}'. Aborting for safety reasons."
+			setError 70
+			exit
+		esac
+	done
 	
 	echo "[#] Extracting firmware files for ${MIUI_KITCHEN_CFG_LNCH} ..."
 	
@@ -179,7 +199,35 @@ doDevicePrep() {
 		fi
 	done
 	echo ""
-	echo "TODO: De-odex!"
+	if [ "${doDeopt}" == true ]; then
+		if [ -f "${lunchPath}/system/framework/arm64/boot-framework.oat" ]; then
+			echo "[i] Started deopt (deodex)"
+			# Get the readable strings from any 'ol .oat file. They will all have the bootclasspath art output list.
+			strings "${lunchPath}/system/framework/arm64/boot-framework.oat" > /tmp/miui_kitchen_vDexStringsDump
+			# Trim the string dump to the interesting part (the text between 'bootclasspath' and 'compiler-filter' lines), and also line-split on ':' character
+			vDexBootClassPath=$(sed -n '/bootclasspath/,/compiler-filter/{/bootclasspath/b;/compiler-filter/b;p}' "/tmp/miui_kitchen_vDexStringsDump" | tr ":" "\n")
+			rm -f /tmp/miui_kitchen_vDexStringsDump
+			# Finally, trim to a format of "originalPackageDirectory/optFilenameWithoutExtension". We can use basename/dirname to easily parse that.
+			# (Strip text after and including '/out/target/', up to and including '/system/framework/arm64/', and also the .art extension)
+			vDexBootClasses=$(sed 's/out\/target\/.*\/system\/framework\/arm64\///g; s/\.art//g' <<< ${vDexBootClassPath})
+			
+			# "${vDexBootClasses}" will contain a list like the following:
+			#     /system/framework/boot
+			#     [...]
+			#     /system/app/miuisystem/boot-miuisystem
+			# ...i.e. the vdex filename (without extension) and their origin path. It will correspond to the init bootclasspath:
+			#     /system/framework/QPerformance.jar
+			#     [...]
+			#     /system/app/miuisystem/miuisystem.apk
+			# ...deopt'ing the other vdex's is trivial in comparison.
+			#
+			
+			# do a cheap verification of BOOTCLASSPATH against the vdex bootclass path by counting 
+			echo "    [#] Extracting dex's from BOOT vdex's..."
+			echo "TODO: Unfinished."
+			
+		fi
+	fi
 	echo ""
 	echo "[i] All done!"
 	
