@@ -253,7 +253,7 @@ build() {
 		echo "  all             Perform roots, img then zip all in one"
 	elif [ $# -gt 1 ]; then
 		echo "[!] Wrong number of arguments."
-	elif [ "$1" != "roots" -a "$1" != "dirty-roots" -a "$1" != "img" -a "$1" != "zip" ]; then
+	elif [ "$1" != "roots" -a "$1" != "dirty-roots" -a "$1" != "img" -a "$1" != "zip" -a "$1" != "all" ]; then
 		echo "[!] Unknown argument: '${1}'."
 	else
 		doBuild "$@"
