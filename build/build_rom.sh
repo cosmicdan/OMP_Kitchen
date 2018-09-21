@@ -184,15 +184,15 @@ doBuildImg() {
 doBuildZip() {
 	echo ""
 	
-	#rm -f "${miuiOutPath}/release.log"
-	#echo "[#] Building system|vendor.new.dat..."
-	#"${KITCHEN_BIN}/img2sdat/img2sdat.py" -o "${miuiOutPath}" -p system -v 4 "${miuiOutPath}/system.img" >> "${miuiOutPath}/release.log" &
-	#"${KITCHEN_BIN}/img2sdat/img2sdat.py" -o "${miuiOutPath}" -p vendor -v 4 "${miuiOutPath}/vendor.img" >> "${miuiOutPath}/release.log" &
-	#wait
-	#echo "[#] Compressing system|vendor.new.dat.br..."
-	#brotli -j -v -q 5 "${miuiOutPath}/system.new.dat" &
-	#brotli -j -v -q 5 "${miuiOutPath}/vendor.new.dat" &
-	#wait
+	rm -f "${miuiOutPath}/release.log"
+	echo "[#] Building system|vendor.new.dat..."
+	"${KITCHEN_BIN}/img2sdat/img2sdat.py" -o "${miuiOutPath}" -p system -v 4 "${miuiOutPath}/system.img" >> "${miuiOutPath}/release.log" &
+	"${KITCHEN_BIN}/img2sdat/img2sdat.py" -o "${miuiOutPath}" -p vendor -v 4 "${miuiOutPath}/vendor.img" >> "${miuiOutPath}/release.log" &
+	wait
+	echo "[#] Compressing system|vendor.new.dat.br..."
+	brotli -j -v -q 5 "${miuiOutPath}/system.new.dat" &
+	brotli -j -v -q 5 "${miuiOutPath}/vendor.new.dat" &
+	wait
 	
 	echo "[#] Preparing ZIP contents..."
 	rm -rf "${miuiOutPath}/zip"
