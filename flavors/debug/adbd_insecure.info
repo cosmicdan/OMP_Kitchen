@@ -1,0 +1,3 @@
+Built from Omni 8.1 tree with only one change: comment-out the ALLOW_ADBD_NO_AUTH condition in main.cpp (i.e. auth_required = false is always set).
+ 
+Recompile it yourself if you don't trust the binary; I CBF hosting the whole adb source for that change.

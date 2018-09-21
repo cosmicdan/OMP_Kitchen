@@ -9,7 +9,7 @@
 
 # Include the actual kitchen files
 !/build/
-!/patches/
+!/flavors/
 !/.gitignore
 !/*.sh
 !/*.cfg
