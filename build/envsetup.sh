@@ -11,11 +11,10 @@ if [ "${PS1_ORIGINAL}" == "" ]; then
 fi
 
 # setup
-source "${KITCHEN_BIN}/error_handler.sh"
-
 KITCHEN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null && pwd )"
 KITCHEN_BIN="${KITCHEN_ROOT}/build"
 export PATH="${PATH}:${KITCHEN_BIN}"
+source "${KITCHEN_BIN}/error_handler.sh"
 
 MIUI_KITCHEN_CFG_LNCH=NONE
 MIUI_KITCHEN_CFG_BASE=NONE
@@ -58,10 +57,12 @@ lunch_or_rebase() {
 	echo "> ${inCommand} $@"
 	echo ""
 	if [ $# == 0 ]; then
-		echo "[i] Syntax:"
-		echo "    ${inCommand} {name}|{number}"
+		echo "[i] Syntax is..."
+		echo "    ${inCommand} DEVICE"
+		echo "...where..."
+		echo "    DEVICE             Name or number of the device to select."
 		echo ""
-		echo "[i] List of current devices:"
+		echo "[i] Available devices are:"
 		devicesAvailableIndex=0
 		for deviceDir in ${KITCHEN_ROOT}/devices/*; do
 			echo "    ${devicesAvailableIndex}) ${deviceDir/${KITCHEN_ROOT}\/devices\//}"
@@ -133,9 +134,8 @@ lunch_or_rebase() {
 		# full build number
 		romBuildNum=${romBuildMajor}.${romBuildMinor}
 		echo "[i] ROM build number set to ${romBuildNum}"
-		
-		echo ""
 	fi
+	echo ""
 }
 
 lunch() {
@@ -155,13 +155,15 @@ prep() {
 	echo "> prep $@"
 	echo ""
 	if [ $# == 0 ]; then
-		echo "[i] Syntax:"
-		echo "    prep all|missing [clean]"
-		echo ""
-		echo "  all             Prepare all (boot, system, vendor and file_contexts)"
-		echo "  missing         Prepare only things detected missing"
-		echo ""
-		echo "  clean           Specify to delete unnecessary firmware files after extraction"
+		echo "[i] Syntax is..."
+		echo "    prep TASK [OPTION]"
+		echo "...where..."
+		echo "    TASK is one of:"
+		echo "        all              Prepare all firmware files (boot, system, vendor and file_contexts). Will overwrite existing prepared files."
+		echo "        missing          Prepare only firmware files that are not detected as prepared."
+		echo "    OPTION is zero or more of:"
+		echo "        cleanup          If specified, will delete original unnecessary firmware files after they've been extracted/converted/etc."
+		echo "        skip-deopt       If specified, de-optimization (a.k.a 'deodex') will NOT be performed. Advanced/debugging use only."
 	else
 		doDevicePrep "$@"
 	fi
@@ -210,14 +212,13 @@ flavor() {
 		fi
 		if [ -d "${KITCHEN_ROOT}/flavors/${inArg}" ]; then
 			# verify critical stuff exists
-			# TODO
-			#for deviceContent in "firmware-update/" "META-INF/"; do
-			#	if [ ! -e "${KITCHEN_ROOT}/devices/${inArg}/${deviceContent}" ]; then
-			#		echo "[!] Error - device/firmware is missing '${deviceContent}' - aborted!"
-			#		setError 64
-			#		exit
-			#	fi
-			#done
+			for flavorContent in "include.sh" "info"; do
+				if [ ! -e "${KITCHEN_ROOT}/flavors/${inArg}/${flavorContent}" ]; then
+					echo "[!] Error - flavor is missing critical file/folder '${flavorContent}' - aborted!"
+					setError 69
+					exit
+				fi
+			done
 			echo "[i] flavor set: ${inArg}"
 			echo "${inArg}" > /tmp/miui_kitchen_cfg_flavor
 		else
