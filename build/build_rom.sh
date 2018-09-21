@@ -64,15 +64,15 @@ doBuild() {
 	echo "    Out path: ${miuiOutPath}"
 	echo "    Out ZIP: ${miuiOutZip}"
 
-	if [ "${buildArg}" == "roots" -o "${buildArg}" == "dirty-roots" ]; then
+	if [ "${buildArg}" == "roots" -o "${buildArg}" == "dirty-roots" -o "${buildArg}" == "all" ]; then
 		doBuildRoots
 	fi
 	
-	if [ "${buildArg}" == "img" ]; then
+	if [ "${buildArg}" == "img" -o "${buildArg}" == "all" ]; then
 		doBuildImg
 	fi
 	
-	if [ "${buildArg}" == "zip" ]; then
+	if [ "${buildArg}" == "zip" -o "${buildArg}" == "all" ]; then
 		doBuildZip
 	fi
 	
@@ -84,27 +84,33 @@ doBuild() {
 }
 
 #########################################################################################################################################################################################
-# buildArg = roots or dirty-roots
+# buildArg = roots or dirty-roots (or all)
 doBuildRoots() {
 	echo ""
 	
+	buildRootsArg="${buildArg}"
+	if [ "${buildRootsArg}" == "all" ]; then
+		# do a clean build for `build all`
+		buildRootsArg="roots"
+	fi
+	
 	if [ -d "${miuiOutPath}/system" ]; then
-		if [ "${buildArg}" == "roots" ]; then
+		if [ "${buildRootsArg}" == "roots" ]; then
 			rm -rf "${miuiOutPath}/system"
 		fi
 	fi
 	if [ -d "${miuiOutPath}/vendor" ]; then
-		if [ "${buildArg}" == "roots" ]; then
+		if [ "${buildRootsArg}" == "roots" ]; then
 			rm -rf "${miuiOutPath}/vendor"
 		fi
 	fi
 	if [ -d "${miuiOutPath}/boot" ]; then
-		if [ "${buildArg}" == "roots" ]; then
+		if [ "${buildRootsArg}" == "roots" ]; then
 			rm -rf "${miuiOutPath}/boot"
 		fi
 	fi
 	
-	if [ "${buildArg}" == "dirty-roots" ]; then
+	if [ "${buildRootsArg}" == "dirty-roots" ]; then
 		echo "[!] Warning - performing dirty build!"
 	fi
 	
@@ -119,7 +125,7 @@ doBuildRoots() {
 	mkdir -p "${miuiOutPath}/boot"
 	rsync -a "${lunchPath}/boot/" "${miuiOutPath}/boot/"
 	# also copy file_contexts to initramfs
-	cp -a "${lunchPath}/file_contexts" "${miuiOutPath}/boot/file_contexts"
+	cp -a "${lunchPath}/file_contexts" "${miuiOutPath}/boot/ramdisk/file_contexts"
 	echo ""
 	
 	# execute flavorDoRoots from flavor's include.sh
@@ -138,7 +144,7 @@ doBuildRoots() {
 		echo "[i] Skipping deviceDoRoots because device '${MIUI_KITCHEN_CFG_LNCH}' does not provide it."
 	fi
 	
-	# TODO: modify branding to avoid potential OTA conflicts. Append the following properties:
+	# TODO: modify branding to avoid potential OTA conflicts. Modify the following properties:
 	# ro.build.display.id
 	# ro.modversion
 	# ro.xiaomi.developerid
@@ -150,7 +156,7 @@ doBuildRoots() {
 
 
 #########################################################################################################################################################################################
-# buildArg = img
+# buildArg = img (or all)
 doBuildImg() {
 	echo ""
 	
@@ -180,7 +186,7 @@ doBuildImg() {
 
 
 #########################################################################################################################################################################################
-# buildArg = zip
+# buildArg = zip (or all)
 doBuildZip() {
 	echo ""
 	

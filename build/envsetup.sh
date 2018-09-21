@@ -250,6 +250,7 @@ build() {
 		echo "  dirty-roots     Like roots, but does not delete pre-existing system/vendor/boot-ramdisk"
 		echo "  img             Build img files from existing roots i.e. system.img, vendor.img and boot.img. Does not imply roots."
 		echo "  zip             Create .new.dat.br files and pack to flashable ZIP. Does not imply roots or img."
+		echo "  all             Perform roots, img then zip all in one"
 	elif [ $# -gt 1 ]; then
 		echo "[!] Wrong number of arguments."
 	elif [ "$1" != "roots" -a "$1" != "dirty-roots" -a "$1" != "img" -a "$1" != "zip" ]; then
